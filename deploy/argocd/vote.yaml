@@ -18,7 +18,7 @@ spec:
       values: |
         image:
           repository: "ghcr.io/lexfrei/vote"
-          tag: "sha-25be023"
+          tag: "sha-6b0ebe8"
         env:
           REDIS_HOST: "redis-frame"
         ingress:
