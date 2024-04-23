@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vote
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    namespace: default
+    server: "https://kubernetes.default.svc"
+  source:
+    repoURL: "https://lexfrei.github.io/charts"
+    targetRevision: "0.1.2"
+    chart: frame
+    helm:
+      values: |
+        image:
+          repository: "ghcr.io/lexfrei/vote"
+          tag: "sha-25be023"
+        ingress:
+          enabled: true
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: tunnel
+            cert-manager.io/cluster-issuer: cloudflare-issuer
+          hosts:
+            - host: vote.lex.la
+              paths:
+                - path: /
+                  pathType: ImplementationSpecific
+          tls:
+            - secretName: vote-lex-la-tls
+              hosts:
+                - vote.lex.la
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
