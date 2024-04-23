@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, make_response, g
-from redis import Redis
-import os
-import socket
-import random
 import json
 import logging
+import os
+import random
+import socket
+
+from flask import Flask, g, make_response, render_template, request
+from redis import Redis
 
 option_a = os.getenv('OPTION_A', "Cats")
 option_b = os.getenv('OPTION_B', "Dogs")
@@ -16,12 +17,17 @@ gunicorn_error_logger = logging.getLogger('gunicorn.error')
 app.logger.handlers.extend(gunicorn_error_logger.handlers)
 app.logger.setLevel(logging.INFO)
 
+
 def get_redis():
+    # Read environment variable REDIS_HOST
+    redis_host = os.getenv('REDIS_HOST', 'localhost')
+
     if not hasattr(g, 'redis'):
-        g.redis = Redis(host="redis", db=0, socket_timeout=5)
+        g.redis = Redis(host=redis_host, db=0, socket_timeout=5)
     return g.redis
 
-@app.route("/", methods=['POST','GET'])
+
+@app.route("/", methods=['POST', 'GET'])
 def hello():
     voter_id = request.cookies.get('voter_id')
     if not voter_id:
